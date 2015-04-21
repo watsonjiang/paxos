@@ -28,6 +28,8 @@ class Proposer(MsgNode, threading.Thread):
       MsgNode.__init__(self)
       self.id = id
       self.val = val
+      self._last_proposal_num = id
+      self._last_proposal_val = None
 
    def propose(self):
       #a proposer selects a proposal number n and sends a prepare
@@ -153,8 +155,8 @@ class Acceptor(MsgNode, threading.Thread):
                rsp.src = msg.dest
                rsp.dest = msg.src
                rsp.proposal_num = msg.proposal_num
-               a_n = msg.proposal_num
-               a_v = msg.proposal_val
+               self.a_n = msg.proposal_num
+               self.a_v = msg.proposal_val
                g_msg_router.send(rsp)
                print "acceptor", self.id, "send", rsp
  
@@ -225,7 +227,7 @@ class MsgRouter:
 
 # connect all node.
 g_p_list = []
-NUM_OF_PROPOSER = 1 
+NUM_OF_PROPOSER = 2 
 g_a_list = []
 NUM_OF_ACCEPTOR = 3
 QUOROM_OF_ACCEPTOR = 2
@@ -239,7 +241,7 @@ def init_env():
       g_msg_router.register_node(tmp)
 
    for i in xrange(10, 10+NUM_OF_PROPOSER):
-      tmp = Proposer(i, "hello consensus!!")
+      tmp = Proposer(i, "hello consensus!!"+str(i))
       tmp.start()
       g_p_list.append(tmp)
       g_msg_router.register_node(tmp)
