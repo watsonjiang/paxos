@@ -5,6 +5,7 @@ import threading
 import time
 import os
 import copy
+import random
 
 class MsgNode:
    id = 0 
@@ -71,6 +72,7 @@ class Proposer(MsgNode, threading.Thread):
       while True:
          try:
             msg = self.recv(10)
+            time.sleep(random.randint(0,3))  #introduce some concurrency
             if isinstance(msg, PrepareRsp):
                print "proposer", self.id, "got", msg
                if msg.promise_num==self._last_proposal_num:
@@ -92,7 +94,7 @@ class Proposer(MsgNode, threading.Thread):
                if msg.proposal_num==self._last_proposal_num:
                   _acc_rsp_list.append(msg)
                   if len(_acc_rsp_list) >= QUOROM_OF_ACCEPTOR:
-                     print "consensus reached!!", self.id, self._last_proposal_num, self._last_proposal_val
+                     print "================consensus reached!!", self._last_proposal_val
                      break     #stop propose loop
             elif isinstance(msg, AcceptReq):
                #ignore
@@ -227,7 +229,7 @@ class MsgRouter:
 
 # connect all node.
 g_p_list = []
-NUM_OF_PROPOSER = 2 
+NUM_OF_PROPOSER = 3 
 g_a_list = []
 NUM_OF_ACCEPTOR = 3
 QUOROM_OF_ACCEPTOR = 2
